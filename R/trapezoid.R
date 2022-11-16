@@ -1,3 +1,15 @@
+#' Implement Trapezoid Rule for Generic Function
+#'
+#' @param n The number of intervals used for approximation
+#' @param f A function with a single argument x
+#' @param range A vector containing the lower and upper endpoints of the range of integration
+#'
+#' @return Returns a single value which is the trapezoidal approximation of the function over (a,b)
+#'
+#' @examples
+#' trapezoid(sqrt, c(1,3),5)
+#'
+#' @export
 trapezoid <- function(n,f,range){
   # input
   a = range[1]
