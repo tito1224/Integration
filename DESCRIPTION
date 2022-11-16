@@ -10,3 +10,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 URL: https://github.com/tito1224/Integration
 BugReports: https://github.com/tito1224/Integration/issues
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
