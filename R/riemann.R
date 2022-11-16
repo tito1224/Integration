@@ -1,3 +1,15 @@
+#' Implement Riemann Integration for a Generic Function
+#'
+#' @param f A function with a single argument x
+#' @param range A vector containing the lower and upper endpoints of the range of integration
+#' @param n The number of intervals used for Riemann approximation
+#'
+#' @return Returns a single value which is the Riemann approximation of the function over (a,b)
+#'
+#' @examples
+#' riemann(5,sqrt, c(1,3))
+
+#' @export
 riemann <- function(n,f,range){
   # f = function with a single argument x
   # range = a vector specifying the lower and upper end points (a,b)
