@@ -1,8 +1,8 @@
 #' Implement Riemann Integration for a Generic Function
 #'
+#' @param n The number of intervals used for Riemann approximation
 #' @param f A function with a single argument x
 #' @param range A vector containing the lower and upper endpoints of the range of integration
-#' @param n The number of intervals used for Riemann approximation
 #'
 #' @return Returns a single value which is the Riemann approximation of the function over (a,b)
 #'
