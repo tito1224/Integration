@@ -61,9 +61,9 @@ So range = c(0,10) means you want to find the area under the curve from 0 to 10
 that the larger n is, the better the approximation to the area is!
 
 ## Unique Function
-Here is an example of how to use the Integration package on a function that one 
-develops.
 
+Here is an example of how to use the Integration package on an in-built function.
+Simpson's method is the most accurate.
 ```{r}
 resultRiemann <- Integration::riemann(100,sqrt,c(0,10))
 resultTrapezoid <- Integration::trapezoid(100,sqrt,c(0,10))
@@ -74,6 +74,24 @@ paste("The approximate Trapezoidal value is", resultTrapezoid)
 paste("The approximate Simpsons value is", resultSimpsons)
 ```
 
+Another example, if one uses a function built on their own. Once again, we see
+that simpsons method is the most accurate
+
+```{r}
+cubicFunction = function(x){
+  result = x^3
+}
+```
+
+```{r}
+resultRiemann <- Integration::riemann(100,cubicFunction,c(0,2))
+resultTrapezoid <- Integration::trapezoid(100,cubicFunction,c(0,2))
+resultSimpsons <- Integration::simpsons(100,cubicFunction,c(0,2))
+
+paste("The approximate Riemann value is", resultRiemann)
+paste("The approximate Trapezoidal value is", resultTrapezoid)
+paste("The approximate Simpsons value is", resultSimpsons)
+```
 
 ## Comparison 
 
@@ -82,7 +100,6 @@ holds up compared to each other.
 
 ### Graphs
 
-Create Data
 ```{r}
 # load functionvalues
 x = 0:20
@@ -98,13 +115,15 @@ nIntervals = 5
 
 #### Target Area
 
+The graph below illustrates the target area under the curve.
 ```{r}
-df1 <- tibble(x = unique(sort(c(seq(a,b,.01),20))),
+df1 <- tibble(x = unique(sort(c(seq(0,b,.01),20))),
                     f = sqrt(x))
 
 df2 <- df1 %>%
-  filter(x <= b) %>%
-  bind_rows(tibble(x = b, f = 0)) 
+  filter(x <= b & x>=a) %>%
+  bind_rows(tibble(x = b, f = 0)) %>%
+  bind_rows(tibble(x = a, f = 0)) 
 
 finalFig <- df1 %>%
   ggplot(aes(x = x, y = f)) + 
@@ -119,6 +138,56 @@ finalFig <- df1 %>%
 finalFig
 
 ```
+
+
+
+#### Riemann
+
+```{r}
+dfRiemann = tibble(n = nIntervals, 
+                   x = seq(a,b,length = nIntervals+1)[-(nIntervals+1)], 
+                   f = sqrt(x))%>%
+  mutate(x1 = x + (b-a)/(2*n))
+
+finalFig+
+  geom_bar(data = dfRiemann, aes(x=x1,y=f),stat = "identity",fill="darkblue",
+           alpha=0.7,
+           width = (b-a)/nIntervals)+
+  theme_minimal()+ 
+  labs(title = "Riemann Integration of Square Root Function", 
+       subtitle = "Riemann Approximations in Blue")
+```
+```{r}
+resultRiemann <- Integration::riemann(nIntervals,sqrt,c(a,b))
+paste("The approximate Riemann value with range (",a,",",b,")", "and",nIntervals,"intervals is", round(resultRiemann,3))
+```
+
+#### Trapezoidal Rule
+We can see that compared to Riemann integration, the trapezoid rule covers a lot
+more of the target area. 
+```{r}
+dfTrapezoid = tibble(n = nIntervals, 
+                   x = seq(a,b,length = nIntervals+1), 
+                   f = sqrt(x))%>%
+  bind_rows(tibble(n = nIntervals, 
+                   x = b-a,
+                   f = 0))
+
+finalFig+
+  geom_polygon(data= dfTrapezoid, aes(x=x,y=f),fill="darkblue",alpha=0.7)+
+  theme_minimal()+ 
+  labs(title = "Trapezoidal Integration of Square Root Function", 
+       subtitle = "Trapezoidal Approximations in Blue")
+```
+
+```{r}
+resultTrapezoid <- Integration::trapezoid(nIntervals,sqrt,c(a,b))
+paste("The approximate Trapezoidal value with range (",a,",",b,")", "and",nIntervals,"intervals is", round(resultTrapezoid,3))
+```
+
+It will be difficult to show how the area is integrated using Simpson's rule 
+as it is more complex. However the speed of integration between the Riemann method, 
+Trapezoid Rule and Simpson's rule will be compared in the later section.
 
 ### Speed
 
