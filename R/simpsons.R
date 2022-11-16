@@ -1,3 +1,15 @@
+#' Implement Simpson's Rule for Generic Function
+#'
+#' @param n The number of intervals used for approximation
+#' @param f A function with a single argument x
+#' @param range A vector containing the lower and upper endpoints of the range of integration
+#'
+#' @return Returns a single value which is the simpson approximation of the function over (a,b)
+#'
+#' @examples
+#' simpsons(5,sqrt, c(1,3))
+#'
+#' @export
 simpsons <- function(n,f,range){
   # input
   a = range[1]
