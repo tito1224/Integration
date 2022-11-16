@@ -15,5 +15,143 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-#library(Integration)
+#library(Integration) # can't load as library yet
+library(tidyverse)
 ```
+
+
+# Overview 
+
+The Integrate package implements integration using the Newton-Cotes algorithm.
+It focuses on integrating using the following rules:
+
+- Riemann integration
+  - Riemann integration is when we approximate the area under a curve using a 
+  sequence of rectangles whose heights are computed using points from the left hand side, 
+  right hand side, or middle of the interval that composes a rectangle
+  - It is defined as the limit to the approximated sum
+  - $\int_a^b f(x)~dx = \lim_{n\to \infty} \sum_{i=1}^n \frac{b-a}{n} f(x_i)$
+- Trapezoidal rule
+  - This is a more sophisticated way to approximate the shape of the function that 
+  is within the subinterval. Instead of using rectangles, we use lines instead (ie linear interpolation)
+  - The following equation is created:
+  $\int_a^b f(x)~dx \approx \sum_{i=0}^n \frac{f(a+i/n) + f(a+(i+1)/n)}{2} \cdot \frac{b-a}{n}$
+- Simpson's rule
+  - An even more complex way to approximate the area under a curve, and it is done
+  using quadratic interpolation
+  - In this case we find the value of the quadratic function in each subinterval
+  that will connect the end points **and** also interpolate the middle
+  - The resulting equation is:
+  $\int_a ^b f(x) ~dx \approx \sum_{i=1}^n \frac{x_{i}-x_{i-1}}{6}\left[ f(x_{i-1}) + 4f\left(\frac{x_{i} + x_{i-1}}{2}\right) + f(x_{i}) \right].$
+
+
+# Usage
+
+In order to use the functions in the Integrate package, a few key parameters are
+required.
+
+`f` = function of your choosing that has either **one** input value, or one input
+value and the other arguments have default values (ie dexp function). It must also 
+only return one value.
+
+`range` = a vector of length 2 that species the range you want to integrate over. 
+So range = c(0,10) means you want to find the area under the curve from 0 to 10
+
+`n` = the number of intervals you would like to use to make the approximation. Note
+that the larger n is, the better the approximation to the area is!
+
+## Unique Function
+Here is an example of how to use the Integration package on a function that one 
+develops.
+
+```{r}
+resultRiemann <- Integration::riemann(100,sqrt,c(0,10))
+resultTrapezoid <- Integration::trapezoid(100,sqrt,c(0,10))
+resultSimpsons <- Integration::simpsons(100,sqrt,c(0,10))
+
+paste("The approximate Riemann value is", resultRiemann)
+paste("The approximate Trapezoidal value is", resultTrapezoid)
+paste("The approximate Simpsons value is", resultSimpsons)
+```
+
+
+## Comparison 
+
+Below you will find comparisons of the various rules and see how their efficacy 
+holds up compared to each other.
+
+### Graphs
+
+Create Data
+```{r}
+# load functionvalues
+x = 0:20
+f <- sqrt(x)
+f <- data.frame(f = f, 
+                   x = x)
+
+# set params
+a = 0
+b = 10
+nIntervals = 5
+```
+
+#### Target Area
+
+```{r}
+df1 <- tibble(x = unique(sort(c(seq(a,b,.01),20))),
+                    f = sqrt(x))
+
+df2 <- df1 %>%
+  filter(x <= b) %>%
+  bind_rows(tibble(x = b, f = 0)) 
+
+finalFig <- df1 %>%
+  ggplot(aes(x = x, y = f)) + 
+  geom_line(colour = "red") +
+  ylab("Density") + 
+  geom_hline(yintercept = 0)+
+  geom_polygon(data = df2, fill = "red", alpha = .5)+
+  theme_minimal()+ 
+  labs(title = "Target Area of Square Root Function", 
+       subtitle = "Integrate from 0 to 10")
+
+finalFig
+
+```
+
+### Speed
+
+Here we compare the efficacy of the various algorithms in computing the integral 
+of the square root function. 
+
+We can see that when Simpson's rule is used, it takes the least amount of time
+to converge to the correct answer, followed by the trapezoid rule. Using Riemann 
+integration is not as efficient since it takes at least 50 iterations for it to be 
+close to the correct area, and it consistently underestimates the area under the 
+curve. 
+```{r}
+n = 1:100
+dfSpeed = tibble(n =n)
+dfSpeed$Riemann = sapply(dfSpeed$n, Integration::riemann, sqrt, c(a,b))
+dfSpeed$Trapezoid = sapply(dfSpeed$n, Integration::trapezoid, sqrt, c(a,b))
+dfSpeed$Simpsons = sapply(dfSpeed$n, Integration::simpsons, sqrt, c(a,b))
+```
+
+```{r}
+dfSpeedLong = dfSpeed %>%
+  pivot_longer(cols = c("Riemann","Trapezoid","Simpsons"), names_to = "Algorithm", 
+               values_to = "Values")
+
+ggplot(dfSpeedLong)+ 
+  geom_line(aes(x=n,y = Values, color = Algorithm))+ 
+  theme_minimal()+ 
+  labs(title = "Comparing Covergence of Integration Algorithms",
+       subtitle = "Integrating the square root function from 0 to 10",
+       x = "Number of Intervals",
+       y = "Approximated Area Under the Curve")
+```
+
+
+
+
