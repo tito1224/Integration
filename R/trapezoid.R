@@ -7,7 +7,7 @@
 #' @return Returns a single value which is the trapezoidal approximation of the function over (a,b)
 #'
 #' @examples
-#' trapezoid(sqrt, c(1,3),5)
+#' trapezoid(5,sqrt, c(1,3))
 #'
 #' @export
 trapezoid <- function(n,f,range){
