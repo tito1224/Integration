@@ -20,6 +20,6 @@ Returns a single value which is the trapezoidal approximation of the function ov
 Implement Trapezoid Rule for Generic Function
 }
 \examples{
-trapezoid(sqrt, c(1,3),5)
+trapezoid(5,sqrt, c(1,3))
 
 }
